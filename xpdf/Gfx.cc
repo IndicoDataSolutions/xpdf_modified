@@ -543,6 +543,11 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict,
     out->clip(state);
     state->clearPath();
   }
+
+  // Save bounding box of page as first row in path csv
+  std::ostringstream page_bbox_out;
+  page_bbox_out << box->x1 << "," << box->y1 << "," << box->x2 << "," << box->y2 << "\n";
+  out->outputPath(page_bbox_out.str());
 }
 
 Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict,
