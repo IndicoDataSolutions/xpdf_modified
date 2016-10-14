@@ -724,22 +724,6 @@ void Gfx::go(GBool topLevel) {
 	updateLevel = 0;
       }
 
-// Save Paths
-  GfxPath *path;
-  GfxSubpath *subpath;
-  double x[2], y[2];
-
-  if (state->getPath()->getNumSubpaths() == 1) {
-    path = state->getPath();
-    subpath = path->getSubpath(0);
-
-    state->transform(subpath->getX(0), subpath->getY(0), &x[0], &y[0]);
-    state->transform(subpath->getX(1), subpath->getY(1), &x[1], &y[1]);
-    
-    std::ostringstream convert;
-    convert << x[0] << "," << y[0] << "," << x[1] << "," << y[1] << "\n";
-    out->outputPath(convert.str());
-  }
       // check for an abort
       if (abortCheckCbk) {
 	if (updateLevel - lastAbortCheck > 10) {
@@ -1564,6 +1548,16 @@ void Gfx::opLineTo(Object args[], int numArgs) {
     error(errSyntaxError, getPos(), "No current point in lineto");
     return;
   }
+
+  double x0, y0, x1, y1;
+  x0 = state->getCurX();
+  y0 = state->getCurY();
+  x1 = args[0].getNum();
+  y1 = args[1].getNum();
+  if (x0 == x1 || y0 == y1) {
+    savePath(x0, y0, x1, y1);
+  }
+
   state->lineTo(args[0].getNum(), args[1].getNum());
 }
 
@@ -1627,6 +1621,7 @@ void Gfx::opRectangle(Object args[], int numArgs) {
   state->lineTo(x + w, y + h);
   state->lineTo(x, y + h);
   state->closePath();
+  savePath(x, y+h, x, y);
 }
 
 void Gfx::opClosePath(Object args[], int numArgs) {
@@ -1634,7 +1629,14 @@ void Gfx::opClosePath(Object args[], int numArgs) {
     error(errSyntaxError, getPos(), "No current point in closepath");
     return;
   }
+  double x0, y0, x1, y1;
+  x0 = state->getCurX();
+  y0 = state->getCurY();
+
   state->closePath();
+  x1 = state->getCurX();
+  y1 = state->getCurY();
+  savePath(x0, y0, x1, y1);
 }
 
 //------------------------------------------------------------------------
@@ -4858,4 +4860,16 @@ void Gfx::popResources() {
   resPtr = res->getNext();
   delete res;
   res = resPtr;
+}
+
+
+void Gfx::savePath(double x0, double y0, double x1, double y1) {
+  double x[2], y[2];
+  state->transform(x0, y0, &x[0], &y[0]);
+  state->transform(x1, y1, &x[1], &y[1]);
+  
+  std::ostringstream path_out;
+  path_out << x[0] << "," << y[0] << "," << x[1] << "," << y[1] << "\n";
+  out->outputPath(path_out.str());
+
 }

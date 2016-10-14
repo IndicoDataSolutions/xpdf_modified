@@ -366,6 +366,8 @@ private:
   void restoreStateStack(GfxState *oldState);
   void pushResources(Dict *resDict);
   void popResources();
+
+  void savePath(double x0, double y0, double x1, double y1);
 };
 
 #endif
