@@ -38,6 +38,10 @@
 #include "Error.h"
 #include "TextString.h"
 #include "Gfx.h"
+#include <iostream>
+#include <sstream>
+
+
 
 // the MSVC math.h doesn't define this
 #ifndef M_PI
@@ -720,6 +724,22 @@ void Gfx::go(GBool topLevel) {
 	updateLevel = 0;
       }
 
+// Save Paths
+  GfxPath *path;
+  GfxSubpath *subpath;
+  double x[2], y[2];
+
+  if (state->getPath()->getNumSubpaths() == 1) {
+    path = state->getPath();
+    subpath = path->getSubpath(0);
+
+    state->transform(subpath->getX(0), subpath->getY(0), &x[0], &y[0]);
+    state->transform(subpath->getX(1), subpath->getY(1), &x[1], &y[1]);
+    
+    std::ostringstream convert;
+    convert << x[0] << "," << y[0] << "," << x[1] << "," << y[1] << "\n";
+    out->outputPath(convert.str());
+  }
       // check for an abort
       if (abortCheckCbk) {
 	if (updateLevel - lastAbortCheck > 10) {
@@ -3770,6 +3790,7 @@ void Gfx::opXObject(Object args[], int numArgs) {
     if (obj2.isName("Image")) {
       if (out->needNonText()) {
 	res->lookupXObjectNF(name, &refObj);
+
 	doImage(&refObj, obj1.getStream(), gFalse);
 	refObj.free();
       }

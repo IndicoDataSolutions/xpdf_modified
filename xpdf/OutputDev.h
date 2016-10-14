@@ -17,6 +17,7 @@
 
 #include "gtypes.h"
 #include "CharTypes.h"
+#include <string> 
 
 class GString;
 class Gfx;
@@ -253,6 +254,8 @@ public:
 
   //----- links
   virtual void processLink(Link *link) {}
+  virtual void outputPath(std::string s) {};
+
 
 #if 1 //~tmp: turn off anti-aliasing temporarily
   virtual void setInShading(GBool sh) {}

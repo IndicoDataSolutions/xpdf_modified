@@ -32,7 +32,8 @@
 #include "GfxState.h"
 #include "Link.h"
 #include "JSONOutputDev.h"
-#include <iostream>
+#include <sstream>
+#include <string>
 #include "json.hpp"
 
 
@@ -4224,11 +4225,12 @@ static void outputToFile(void *stream, const char *text, int len) {
 }
 
 
-JSONOutputDev::JSONOutputDev(char *fileName, JSONTextOutputControl *controlA,
+JSONOutputDev::JSONOutputDev(char *fileName, char *pathFileName, JSONTextOutputControl *controlA,
 			     GBool append) {
   text = NULL;
   control = *controlA;
   ok = gTrue;
+  pageNum = 0;
 
   // open file
   needClose = gFalse;
@@ -4241,6 +4243,11 @@ JSONOutputDev::JSONOutputDev(char *fileName, JSONTextOutputControl *controlA,
 #endif
     } else if ((outputStream = fopen(fileName, append ? "ab" : "wb"))) {
       needClose = gTrue;
+      pathOutputStream = fopen(pathFileName, append ? "ab" : "wb");
+      std::ostringstream pathHeader;
+      pathHeader << "page_number,x0,y0,x1,y1\n";
+      outputToFile(pathOutputStream, pathHeader.str().c_str(), pathHeader.str().length());
+      
     } else {
       error(errIO, -1, "Couldn't open text file '{0:s}'", fileName);
       ok = gFalse;
@@ -4268,6 +4275,7 @@ JSONOutputDev::JSONOutputDev(TextOutputFunc func, void *stream,
 JSONOutputDev::~JSONOutputDev() {
   if (needClose) {
     fclose((FILE *)outputStream);
+    fclose((FILE *)pathOutputStream);
   }
   if (text) {
     delete text;
@@ -4282,6 +4290,7 @@ void JSONOutputDev::endPage() {
   if (outputStream) {
     text->write(outputStream, outputFunc);
   }
+  pageNum += 1;
 }
 
 void JSONOutputDev::restoreState(GfxState *state) {
@@ -4462,6 +4471,12 @@ void JSONOutputDev::processLink(Link *link) {
     yMax = y;
   }
   text->addLink(xMin, yMin, xMax, yMax, link);
+}
+
+void JSONOutputDev::outputPath(std::string s)  {
+  std::ostringstream outputPathStr;
+  outputPathStr << pageNum << ", " << s;
+  outputToFile(pathOutputStream, outputPathStr.str().c_str(), outputPathStr.str().length());
 }
 
 GBool JSONOutputDev::findText(Unicode *s, int len,

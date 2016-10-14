@@ -19,6 +19,7 @@
 #include "gtypes.h"
 #include "GfxFont.h"
 #include "OutputDev.h"
+#include <string> 
 
 class GList;
 class UnicodeMap;
@@ -466,7 +467,7 @@ public:
   // <physLayoutA> is true, the original physical layout of the text
   // is maintained.  If <rawOrder> is true, the text is kept in
   // content stream order.
-  JSONOutputDev(char *fileName, JSONTextOutputControl *controlA,
+  JSONOutputDev(char *fileName, char *pathFileName, JSONTextOutputControl *controlA,
 		GBool append);
 
   // Create a JSONOutputDev which will write to a generic stream.  If
@@ -535,6 +536,8 @@ public:
   //----- link borders
   virtual void processLink(Link *link);
 
+  virtual void outputPath(std::string s);
+
   //----- special access
 
   // Find a string.  If <startAtTop> is true, starts looking at the
@@ -580,11 +583,13 @@ private:
 
   TextOutputFunc outputFunc;	// output function
   void *outputStream;		// output stream
+  void *pathOutputStream;		// output stream
   GBool needClose;		// need to close the output file?
 				//   (only if outputStream is a FILE*)
   JSONTextPage *text;		// text for the current page
   JSONTextOutputControl control;	// formatting parameters
   GBool ok;			// set up ok?
+  int pageNum;
 };
 
 #endif

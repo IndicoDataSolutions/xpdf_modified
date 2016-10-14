@@ -104,6 +104,7 @@ int main(int argc, char *argv[]) {
   PDFDoc *doc;
   GString *fileName;
   GString *textFileName;
+  GString *pathFileName;
   GString *ownerPW, *userPW;
   JSONTextOutputControl textOutControl;
   JSONOutputDev *textOut;
@@ -198,6 +199,8 @@ int main(int argc, char *argv[]) {
   }
 
   // construct text file name
+  pathFileName = new GString(fileName->getCString(),
+      fileName->getLength() - 4);
   if (argc == 3) {
     textFileName = new GString(argv[2]);
   } else {
@@ -209,6 +212,7 @@ int main(int argc, char *argv[]) {
       textFileName = fileName->copy();
     }
     textFileName->append(".ndjson");
+    pathFileName->append(".csv");
   }
 
   // get page range
@@ -236,7 +240,7 @@ int main(int argc, char *argv[]) {
     textOutControl.mode = textOutReadingOrder;
   }
   textOutControl.clipText = clipText;
-  textOut = new JSONOutputDev(textFileName->getCString(), &textOutControl,
+  textOut = new JSONOutputDev(textFileName->getCString(), pathFileName->getCString(), &textOutControl,
 			      gFalse);
   if (textOut->isOk()) {
     doc->displayPages(textOut, firstPage, lastPage, 72, 72, 0,
