@@ -18,7 +18,7 @@ INSTALL = /usr/bin/install -c
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_DATA = ${INSTALL} -m 644
 
-EXE = 
+EXE =
 
 all:
 	cd goo; $(MAKE)
@@ -78,6 +78,12 @@ pdfimages:
 	cd fofi; $(MAKE)
 	cd splash; $(MAKE)
 	cd xpdf; $(MAKE) pdfimages$(EXE)
+
+pdftojson:
+	cd goo; $(MAKE)
+	cd fofi; $(MAKE)
+	cd splash; $(MAKE)
+	cd xpdf; $(MAKE) pdftojson$(EXE)
 
 dummy:
 
